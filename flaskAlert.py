@@ -9,7 +9,7 @@ app.secret_key = 'lAlAlA123'
 basic_auth = BasicAuth(app)
 
 # Yes need to have -, change it!
-chatID = "-xchatIDx"
+chatID = "xchatIDx"
 
 # Authentication conf, change it!
 app.config['BASIC_AUTH_FORCE'] = True
@@ -21,40 +21,42 @@ bot = telegram.Bot(token="botToken")
 
 @app.route('/alert', methods = ['POST'])
 def postAlertmanager():
-
     try:
         content = json.loads(request.get_data())
+        print(content)
         for alert in content['alerts']:
-            message = "Status: "+alert['status']+"\n"
-            if 'name' in alert['labels']:
-                message += "Instance: "+alert['labels']['instance']+"("+alert['labels']['name']+")\n"
-            else:
-                message += "Instance: "+alert['labels']['instance']+"\n"
+            print(alert)
+            message = "**" + "Status: " + "**" + (alert['status']).upper()+"\n"
+            message += "**" + "Alertname: " + "**" +alert['labels']['alertname']+"\n"
+            # if 'name' in alert['labels']:
+            #     message += "Instance: "+ alert['labels']['instance'] + "("+alert['labels']['name']+")\n"
+            # else:
+            #     message += "Instance: "+alert['labels']['instance']+"\n"
             if 'info' in alert['annotations']:
-                message += "Info: "+alert['annotations']['info']+"\n"
+                message += "**" + "Info: " + "**" + "`" + alert['annotations']['info'] + "`"+ "\n"
             if 'summary' in alert['annotations']:
-                message += "Summary: "+alert['annotations']['summary']+"\n"                
+                message += "**" + "Summary: " + "**" + "`" +alert['annotations']['summary'] +"`"+ "\n"
             if 'description' in alert['annotations']:
-                message += "Description: "+alert['annotations']['description']+"\n"
+                message += "**" + "Description: " + "**" +"`"+ alert['annotations']['description'] +"`"+ "\n"
             if alert['status'] == "resolved":
                 correctDate = parser.parse(alert['endsAt']).strftime('%Y-%m-%d %H:%M:%S')
-                message += "Resolved: "+correctDate
+                message += "**" + "Resolved: " + "**" + "`" + str(correctDate) + "`"
             elif alert['status'] == "firing":
                 correctDate = parser.parse(alert['startsAt']).strftime('%Y-%m-%d %H:%M:%S')
-                message += "Started: "+correctDate
-            bot.sendMessage(chat_id=chatID, text=message)
+                message += "**" + "Started: " + "**" + "`" + str(correctDate) + "`"
+            bot.sendMessage(chat_id=chatID, text=message, parse_mode='Markdown')
             return "Alert OK", 200
     except RetryAfter:
         sleep(30)
-        bot.sendMessage(chat_id=chatID, text=message)
+        bot.sendMessage(chat_id=chatID, text=message, parse_mode='Markdown')
         return "Alert OK", 200
     except TimedOut as e:
         sleep(60)
-        bot.sendMessage(chat_id=chatID, text=message)
+        bot.sendMessage(chat_id=chatID, text=message, parse_mode='Markdown')
         return "Alert OK", 200
     except NetworkError as e:
         sleep(60)
-        bot.sendMessage(chat_id=chatID, text=message)
+        bot.sendMessage(chat_id=chatID, text=message, parse_mode='Markdown')
         return "Alert OK", 200
     except Exception as error:       
         bot.sendMessage(chat_id=chatID, text="Error: "+str(error))
@@ -63,4 +65,4 @@ def postAlertmanager():
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
-    app.run(host='0.0.0.0', port=9119)
+    app.run(host='0.0.0.0', port=9119, debug=True)
