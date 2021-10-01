@@ -3,7 +3,7 @@ FROM alpine:3.7
 LABEL maintainer "Carlos Augusto Malucelli <malucellicarlos@gmail.com>"
 
 RUN apk update \
-                && apk add py3-pip bash gcc python3-dev musl-dev libffi-dev openssl-dev \
+                && apk add py3-pip bash gcc python3-dev musl-dev git libffi-dev openssl-dev \
                 && rm -rf /var/cache/apk/* \
                 && git clone https://github.com/hungviet99/alertmanager-webhook-telegram-python.git \
                 && pip3 install -r alertmanager-webhook-telegram-python/requirements.txt
